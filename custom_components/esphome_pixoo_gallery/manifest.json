@@ -1,0 +1,24 @@
+{
+  "domain": "esphome_pixoo_gallery",
+  "name": "ESPHome Pixoo Gallery",
+  "after_dependencies": [
+    "esphome",
+    "frontend",
+    "media_source"
+  ],
+  "codeowners": [
+    "@klejejs"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "http",
+    "image",
+    "websocket_api"
+  ],
+  "documentation": "https://github.com/klejejs/ha-esphome-pixoo-gallery",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/klejejs/ha-esphome-pixoo-gallery/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

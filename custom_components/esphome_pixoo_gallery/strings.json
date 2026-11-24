@@ -1,0 +1,83 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Pick the Pixoo 64 running the ESPHome Pixoo Gallery package, and the address it uses to download pictures from Home Assistant.",
+        "data": {
+          "device_id": "Display",
+          "base_url": "Home Assistant address for the display"
+        },
+        "data_description": {
+          "device_id": "An ESPHome device with the package's show and clear actions.",
+          "base_url": "Reachable from the display on your network, for example http://192.168.1.10:8123. Plain http is the safe choice: the display may not accept your certificate."
+        }
+      }
+    },
+    "error": {
+      "no_actions": "This device has no show and clear actions. Install the ESPHome Pixoo Gallery package on it first.",
+      "invalid_url": "The address has to start with http:// or https://."
+    },
+    "abort": {
+      "already_configured": "This display is already set up."
+    }
+  },
+  "entity": {
+    "image": {
+      "current": {
+        "name": "Current picture"
+      }
+    }
+  },
+  "services": {
+    "show": {
+      "name": "Show",
+      "description": "Shows a picture, a GIF or a scrolling text on the display.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "Needed only when more than one display is set up."
+        },
+        "url": {
+          "name": "Link",
+          "description": "Link to an image or GIF."
+        },
+        "media": {
+          "name": "File",
+          "description": "An image or GIF from Media."
+        },
+        "text": {
+          "name": "Text",
+          "description": "Text to scroll, up to 120 characters."
+        },
+        "color": {
+          "name": "Text colour",
+          "description": "Colour of the text."
+        }
+      }
+    },
+    "forget": {
+      "name": "Remove from history",
+      "description": "Removes one entry from the display's history list.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "Needed only when more than one display is set up."
+        },
+        "key": {
+          "name": "Key",
+          "description": "The history entry's key."
+        }
+      }
+    },
+    "clear": {
+      "name": "Clear",
+      "description": "Stops showing the picture.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "Needed only when more than one display is set up."
+        }
+      }
+    }
+  }
+}

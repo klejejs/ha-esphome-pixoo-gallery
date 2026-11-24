@@ -1,0 +1,163 @@
+# ESPHome Pixoo Gallery: the display side, for a Divoom Pixoo 64 flashed with ESPHome.
+# Include it as a package; see the README for the few lines of your own it needs.
+
+esphome:
+  min_version: 2026.8.0
+
+esp32:
+  variant: esp32
+  framework:
+    type: esp-idf
+
+psram:
+
+http_request:
+
+spi:
+  clk_pin: GPIO25
+  mosi_pin: GPIO33
+
+globals:
+  - id: frame_count # 0 = nothing to play
+    type: int
+    initial_value: "0"
+  - id: frame_index
+    type: int
+    initial_value: "0"
+  - id: frame_delay # ms per frame, read from the strip when it downloads
+    type: int
+    initial_value: "100"
+  - id: frame_measured # running average of the real time between frames, ms
+    type: float
+    initial_value: "0"
+  - id: scrolling # the picture is one wide band that scrolls (text)
+    type: bool
+    initial_value: "false"
+  - id: scroll_speed # px per second
+    type: int
+    initial_value: "76"
+  - id: scroll_start
+    type: uint32_t
+    initial_value: "0"
+
+api:
+  actions:
+    - action: show
+      variables:
+        url: string
+        delay_ms: int
+      then:
+        - lambda: |-
+            id(frame_count) = 0;
+            if (delay_ms > 0) id(frame_delay) = delay_ms;
+        - online_image.set_url:
+            id: pixoo_strip
+            url: !lambda "return url;"
+    - action: clear
+      then:
+        - lambda: "id(frame_count) = 0;"
+        - online_image.release: pixoo_strip
+        - component.update: pixoo_display
+
+display:
+  - platform: pixoo
+    id: pixoo_display
+    model: 64x64
+    cs_pin: GPIO26
+    lambda: |-
+      if (id(frame_count) > 0) {
+        if (id(scrolling)) it.image(-id(frame_index), 0, id(pixoo_strip));
+        else it.image(0, -64 * id(frame_index), id(pixoo_strip));
+      }
+
+light:
+  - platform: pixoo
+    id: pixoo_light
+    pixoo_id: pixoo_display
+    name: None
+    restore_mode: RESTORE_DEFAULT_ON
+
+image:
+  - platform: online_image
+    id: pixoo_strip
+    # Home Assistant sends the real address with every picture.
+    url: "http://localhost/"
+    format: PNG
+    type: RGB565
+    on_download_finished:
+      - lambda: |-
+          int width = id(pixoo_strip).get_width();
+          int height = id(pixoo_strip).get_height();
+          id(frame_index) = 0;
+          // A height that isn't a multiple of 64 marks a scrolling band; every row below
+          // the 64 shown stands for 2 px per second of scroll speed.
+          id(scrolling) = height % 64 != 0;
+          if (id(scrolling)) {
+            id(frame_count) = std::max(1, width - 64 + 1);
+            id(scroll_speed) = std::max(2, (height - 64) * 2);
+            id(frame_delay) = 1000 / id(scroll_speed);
+            id(scroll_start) = millis();
+          } else {
+            id(frame_count) = std::max(1, height / 64);
+            // Every column past the 64 shown stands for 10 ms of frame delay.
+            int extra = width - 64;
+            if (extra > 0) id(frame_delay) = std::max(20, extra * 10);
+          }
+          ESP_LOGI("pixoo", "Picture downloaded: %d frames, %d ms each%s", id(frame_count), id(frame_delay), id(scrolling) ? ", scrolling" : "");
+      - component.update: pixoo_display
+    on_error:
+      - logger.log:
+          level: ERROR
+          format: "Picture download failed"
+
+interval:
+  - interval: 5ms
+    then:
+      - lambda: |-
+          // Frames are scheduled from the previous due time, not from when the
+          // tick ran, so tick granularity and draw time don't add up into a slowdown.
+          static uint32_t due = 0;
+          static uint32_t previous = 0;
+          if (id(frame_count) <= 1) return;
+          uint32_t now = millis();
+          if (id(scrolling)) {
+            // The offset follows the clock, so the text keeps its speed however long a redraw takes.
+            int index = (int) ((uint64_t) (now - id(scroll_start)) * id(scroll_speed) / 1000 % id(frame_count));
+            if (index == id(frame_index)) return;
+            id(frame_index) = index;
+          } else {
+            if ((int32_t) (now - due) < 0) return;
+            due += id(frame_delay);
+            if ((int32_t) (now - due) > id(frame_delay)) due = now + id(frame_delay);
+            id(frame_index) = (id(frame_index) + 1) % id(frame_count);
+          }
+          id(pixoo_display).update();
+          uint32_t gap = now - previous;
+          previous = now;
+          if (gap < 5000) id(frame_measured) = id(frame_measured) * 0.9f + gap * 0.1f;
+
+sensor:
+  - platform: template
+    name: "Frame delay"
+    unit_of_measurement: ms
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    update_interval: 5s
+    lambda: "return id(frame_delay);"
+  - platform: template
+    name: "Measured frame time"
+    unit_of_measurement: ms
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    update_interval: 5s
+    lambda: "return id(frame_measured);"
+  - platform: template
+    name: "Strip width"
+    unit_of_measurement: px
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    update_interval: 5s
+    lambda: "return id(frame_count) > 0 ? id(pixoo_strip).get_width() : 0;"
+  - platform: uptime
+    name: "Uptime"
+    entity_category: diagnostic

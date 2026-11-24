@@ -1,0 +1,7 @@
+{
+  "name": "ESPHome Pixoo Gallery",
+  "homeassistant": "2025.10.0",
+  "render_readme": true,
+  "zip_release": true,
+  "filename": "esphome_pixoo_gallery.zip"
+}

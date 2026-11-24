@@ -1,0 +1,41 @@
+show:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: esphome_pixoo_gallery
+    url:
+      example: "https://example.com/animation.gif"
+      selector:
+        text:
+          type: url
+    media:
+      selector:
+        media:
+          accept:
+            - image/*
+    text:
+      example: "Hello!"
+      selector:
+        text:
+    color:
+      default: [255, 170, 0]
+      selector:
+        color_rgb:
+forget:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: esphome_pixoo_gallery
+    key:
+      required: true
+      example: "0123456789ab"
+      selector:
+        text:
+clear:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: esphome_pixoo_gallery

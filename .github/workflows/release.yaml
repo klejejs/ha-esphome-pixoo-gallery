@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set the version from the tag
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          jq --arg v "$version" '.version = $v' custom_components/esphome_pixoo_gallery/manifest.json > manifest.tmp
+          mv manifest.tmp custom_components/esphome_pixoo_gallery/manifest.json
+      - name: Zip the integration
+        run: cd custom_components/esphome_pixoo_gallery && zip -r ../../esphome_pixoo_gallery.zip .
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" esphome_pixoo_gallery.zip
