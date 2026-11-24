@@ -5,6 +5,8 @@
 
 Show pictures, GIFs and scrolling text on a Divoom Pixoo 64 flashed with ESPHome, from a Home Assistant dashboard card.
 
+![The dashboard card in the light and dark themes](docs/images/card.png)
+
 - Paste, drop or pick an image or GIF, paste a link, or type a text and pick its colour.
 - Everyone in the house can use it from their phone. Uploads work for users who aren't admins.
 - The last 40 things shown stay in a history list: tap one to show it again, hold it to remove it.
