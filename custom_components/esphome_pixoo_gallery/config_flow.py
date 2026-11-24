@@ -26,7 +26,7 @@ def action_prefix(hass: HomeAssistant, device_id: str) -> str | None:
     device = dr.async_get(hass).async_get(device_id)
     if device is None:
         return None
-    for entry_id in device.config_entries:
+    for entry_id in _device_entry_ids(device):
         entry = hass.config_entries.async_get_entry(entry_id)
         if entry is None or entry.domain != "esphome":
             continue
@@ -39,6 +39,13 @@ def action_prefix(hass: HomeAssistant, device_id: str) -> str | None:
         ):
             return prefix
     return None
+
+
+def _device_entry_ids(device: dr.DeviceEntry) -> list[str]:
+    # Newer Home Assistant gives a device one config_entry_id and deprecates config_entries.
+    if hasattr(device, "config_entry_id"):
+        return [device.config_entry_id] if device.config_entry_id else []
+    return list(device.config_entries)
 
 
 def default_url(hass: HomeAssistant) -> str:
