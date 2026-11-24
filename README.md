@@ -49,9 +49,13 @@ Replace `@main` with a release tag such as `@v0.1.0` to stay on a known version.
 
 ## The integration
 
-1. In HACS, open the menu, choose **Custom repositories**, and add `https://github.com/klejejs/ha-esphome-pixoo-gallery` as an **Integration**.
+[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=klejejs&repository=ha-esphome-pixoo-gallery&category=integration)
+
+1. Click the button above, or in HACS open the menu, choose **Custom repositories**, and add `https://github.com/klejejs/ha-esphome-pixoo-gallery` as an **Integration**.
 2. Install **ESPHome Pixoo Gallery** and restart Home Assistant.
-3. Go to **Settings → Devices & services → Add integration → ESPHome Pixoo Gallery**. Pick the Pixoo, and check the address the display will use to download pictures from Home Assistant.
+3. Add the integration with the button below, or under **Settings → Devices & services → Add integration → ESPHome Pixoo Gallery**. Pick the Pixoo, and check the address the display will use to download pictures from Home Assistant.
+
+[![Open your Home Assistant instance and start setting up ESPHome Pixoo Gallery.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=esphome_pixoo_gallery)
 
 The address has to be reachable from the display on your network, for example `http://192.168.1.10:8123`. Plain `http` is the safe choice, because the display may not accept your certificate.
 
