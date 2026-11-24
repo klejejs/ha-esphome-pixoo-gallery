@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 from datetime import timedelta
+from types import SimpleNamespace
 
 import pytest
 from aiohttp import FormData
@@ -14,6 +15,7 @@ from homeassistant.setup import async_setup_component
 from PIL import Image
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
+from custom_components.esphome_pixoo_gallery.config_flow import _device_entry_ids
 from custom_components.esphome_pixoo_gallery.const import DOMAIN
 
 BASE_URL = "http://192.0.2.10:8123"
@@ -139,3 +141,9 @@ async def test_display_back_online_gets_the_picture_again(
     await hass.async_block_till_done()
     assert len(esphome_calls) == sent + 1
     assert esphome_calls[-1].service == "pixoo64_show"
+
+
+def test_device_entry_ids_prefers_single_entry() -> None:
+    assert _device_entry_ids(SimpleNamespace(config_entry_id="new", config_entries={"old"})) == ["new"]
+    assert _device_entry_ids(SimpleNamespace(config_entry_id=None, config_entries={"old"})) == []
+    assert _device_entry_ids(SimpleNamespace(config_entries={"old"})) == ["old"]
